@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>照片选择器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a14; color: #e8dcc8; font-family: 'PingFang SC', sans-serif; padding: 16px; }
+  h2 { color: #c9a96e; font-size: 16px; letter-spacing: 2px; margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 1px solid rgba(201,169,110,0.3); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+  .item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+  .item img { width: 100%; height: 100%; object-fit: cover; }
+  .item .name { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); font-size: 9px; padding: 3px 4px; text-align: center; color: rgba(255,255,255,0.8); }
+  .note { font-size: 12px; color: rgba(201,169,110,0.7); margin-bottom: 16px; line-height: 1.6; }
+  .current-label { font-size: 10px; background: rgba(233,30,140,0.8); color: white; padding: 2px 5px; border-radius: 4px; position: absolute; top: 4px; left: 4px; z-index: 2; }
+</style>
+</head>
+<body>
+<div style="text-align:center; padding: 16px 0 8px;">
+  <div style="font-size:18px; font-weight:700; color:#c9a96e;">📷 照片预览</div>
+  <div style="font-size:12px; color:rgba(232,220,200,0.5); margin-top:4px;">把文件名告诉我，我来替换</div>
+</div>
+
+<h2>🏔️ 第五章 · 风景旅行（目前用的👇）</h2>
+<p class="note">当前：大卡片=草原夕阳，网格1=蒙古彩旗，网格2=都笑了，网格3=雪地，网格4=大树下<br>要换掉蒙古服那张</p>
+<div class="grid">
+  <div class="item"><span class="current-label">当前大图</span><img src="photos/2023-10-03 173127.jpg"><div class="name">2023-10-03 173127</div></div>
+  <div class="item"><span class="current-label">当前网1</span><img src="photos/2023-10-04 100023.jpg"><div class="name">2023-10-04 100023</div></div>
+  <div class="item"><span class="current-label">当前网2</span><img src="photos/2023-10-04 094430.jpg"><div class="name">2023-10-04 094430</div></div>
+  <div class="item"><span class="current-label">当前网3</span><img src="photos/2025-12-27 125807.jpg"><div class="name">2025-12-27 125807</div></div>
+  <div class="item"><span class="current-label">当前网4</span><img src="photos/2023-06-18 115425.jpg"><div class="name">2023-06-18 115425</div></div>
+</div>
+
+<h2>🌿 可选备用（草原/户外/旅行）</h2>
+<div class="grid">
+  <div class="item"><img src="photos/2023-10-02 132914.jpg"><div class="name">2023-10-02 132914</div></div>
+  <div class="item"><img src="photos/2023-10-02 145646.jpg"><div class="name">2023-10-02 145646</div></div>
+  <div class="item"><img src="photos/2023-10-02 145655.jpg"><div class="name">2023-10-02 145655</div></div>
+  <div class="item"><img src="photos/2023-10-02 211931.jpg"><div class="name">2023-10-02 211931</div></div>
+  <div class="item"><img src="photos/2023-10-03 161440.jpg"><div class="name">2023-10-03 161440</div></div>
+  <div class="item"><img src="photos/2023-10-06 065519.jpg"><div class="name">2023-10-06 065519</div></div>
+  <div class="item"><img src="photos/2023-06-18 122348.jpg"><div class="name">2023-06-18 122348</div></div>
+  <div class="item"><img src="photos/2023-07-02 185625.jpg"><div class="name">2023-07-02 185625</div></div>
+  <div class="item"><img src="photos/2023-07-15 164112.jpg"><div class="name">2023-07-15 164112</div></div>
+  <div class="item"><img src="photos/2023-07-15 164944(1).jpg"><div class="name">2023-07-15 164944(1)</div></div>
+  <div class="item"><img src="photos/2023-07-29 152830.jpg"><div class="name">2023-07-29 152830</div></div>
+  <div class="item"><img src="photos/2023-08-01 193826.jpg"><div class="name">2023-08-01 193826</div></div>
+  <div class="item"><img src="photos/2023-08-05 204920.jpg"><div class="name">2023-08-05 204920</div></div>
+  <div class="item"><img src="photos/2023-09-28 211847.jpg"><div class="name">2023-09-28 211847</div></div>
+</div>
+
+<h2>🏮 第六章 · 最美（目前用的👇）</h2>
+<p class="note">当前：大卡片=DSCF3579古风灯海，横向1=花墙，横向2=情人节，横向3=熊猫，横向4=复古餐厅<br>要换掉古风灯海大卡片</p>
+<div class="grid">
+  <div class="item"><span class="current-label">当前大图</span><img src="photos/DSCF3579.JPG"><div class="name">DSCF3579（古风灯海）</div></div>
+  <div class="item"><span class="current-label">当前横1</span><img src="photos/2023-11-28 100630(1).jpg"><div class="name">2023-11-28 花墙</div></div>
+  <div class="item"><span class="current-label">当前横2</span><img src="photos/2024-02-13 214307.jpg"><div class="name">2024-02-13 情人节</div></div>
+  <div class="item"><span class="current-label">当前横3</span><img src="photos/2023-09-16 144814.jpg"><div class="name">2023-09-16 熊猫</div></div>
+  <div class="item"><span class="current-label">当前横4</span><img src="photos/2023-06-16 113019.png"><div class="name">2023-06-16 复古餐厅</div></div>
+</div>
+
+<h2>✨ 可选备用（人像/颜值/生活）</h2>
+<div class="grid">
+  <div class="item"><img src="photos/2023-11-24 195022.jpg"><div class="name">2023-11-24 195022</div></div>
+  <div class="item"><img src="photos/2023-11-25 174047.jpg"><div class="name">2023-11-25 174047</div></div>
+  <div class="item"><img src="photos/2023-11-26 001837.jpg"><div class="name">2023-11-26 001837</div></div>
+  <div class="item"><img src="photos/2023-12-08 004119.jpg"><div class="name">2023-12-08 004119</div></div>
+  <div class="item"><img src="photos/2023-12-31 150458.jpg"><div class="name">2023-12-31 150458</div></div>
+  <div class="item"><img src="photos/2022-03-08-17-18-11-932.jpg"><div class="name">2022-03-08</div></div>
+  <div class="item"><img src="photos/2021-06-01-20-07-14-141.jpg"><div class="name">2021-06-01</div></div>
+  <div class="item"><img src="photos/2020-06-16 134645.jpg"><div class="name">2020-06-16</div></div>
+  <div class="item"><img src="photos/2018-11-17 184952.jpg"><div class="name">2018-11-17 184952</div></div>
+  <div class="item"><img src="photos/2018-11-17 190449.jpg"><div class="name">2018-11-17 190449</div></div>
+  <div class="item"><img src="photos/2018-12-03 112239.jpg"><div class="name">2018-12-03</div></div>
+  <div class="item"><img src="photos/2018-12-10 175221.png"><div class="name">2018-12-10</div></div>
+  <div class="item"><img src="photos/2018-12-31 173007.jpg"><div class="name">2018-12-31</div></div>
+  <div class="item"><img src="photos/2019-11-02 125836.jpg"><div class="name">2019-11-02</div></div>
+  <div class="item"><img src="photos/2020-12-20-17-54-10-179.jpg"><div class="name">2020-12-20</div></div>
+  <div class="item"><img src="photos/2018-08-20 095949.jpg"><div class="name">2018-08-20</div></div>
+  <div class="item"><img src="photos/2018-09-16 153708.jpg"><div class="name">2018-09-16 153708</div></div>
+</div>
+
+<div style="height: 40px;"></div>
+</body>
+</html>
