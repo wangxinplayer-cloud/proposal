@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>对不起，也谢谢你</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #c9a96e;
+    --deep: #0a0a14;
+    --soft: #1a1a2e;
+    --pink: #f0c4d4;
+    --text: #e8dcc8;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--deep);
+    color: var(--text);
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ========== 星空背景 ========== */
+  #stars {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--d) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    from { opacity: 0.1; transform: scale(0.8); }
+    to { opacity: 0.9; transform: scale(1.2); }
+  }
+
+  /* ========== 开屏道歉 ========== */
+  #apology-screen {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #050510;
+    z-index: 1000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 30px;
+    text-align: center;
+    transition: opacity 1s ease, transform 1s ease;
+  }
+  #apology-screen.hidden {
+    opacity: 0; pointer-events: none; transform: translateY(-30px);
+  }
+  .apology-emoji {
+    font-size: 64px;
+    margin-bottom: 24px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .apology-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--pink);
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+  .apology-text {
+    font-size: 16px;
+    line-height: 2;
+    color: rgba(232,220,200,0.85);
+    max-width: 360px;
+    margin-bottom: 40px;
+  }
+  .apology-text em {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 600;
+  }
+  .enter-btn {
+    background: linear-gradient(135deg, var(--gold), #e8c97e);
+    color: #1a1000;
+    border: none;
+    padding: 16px 48px;
+    border-radius: 50px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 20px rgba(201,169,110,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .enter-btn:active { transform: scale(0.97); }
+  .enter-btn:hover {
+    box-shadow: 0 6px 30px rgba(201,169,110,0.6);
+    transform: translateY(-2px);
+  }
+  .heart-trail {
+    position: absolute;
+    font-size: 20px;
+    pointer-events: none;
+    animation: rise 2s ease-out forwards;
+  }
+  @keyframes rise {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-120px) scale(0.3); }
+  }
+
+  /* ========== 主内容 ========== */
+  #main-content {
+    position: relative; z-index: 1;
+    opacity: 0; transition: opacity 1s ease 0.3s;
+  }
+  #main-content.visible { opacity: 1; }
+
+  /* ========== 章节通用 ========== */
+  .chapter {
+    min-height: 100vh;
+    padding: 80px 24px 60px;
+    position: relative;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .chapter-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.7;
+    margin-bottom: 12px;
+  }
+  .chapter-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .chapter-sub {
+    font-size: 14px;
+    color: rgba(232,220,200,0.6);
+    text-align: center;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+  }
+
+  /* ========== 照片卡片 ========== */
+  .photo-card {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .photo-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+  .photo-card .caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    padding: 30px 16px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    text-align: center;
+  }
+
+  /* 横向滚动相册 */
+  .photo-strip {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 0 24px 16px;
+    width: 100vw;
+    margin-left: -24px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .photo-strip::-webkit-scrollbar { display: none; }
+  .photo-strip .strip-item {
+    flex: 0 0 200px;
+    height: 260px;
+    border-radius: 16px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    position: relative;
+  }
+  .photo-strip .strip-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .photo-strip .strip-item .strip-caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.65));
+    padding: 20px 10px 10px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+  }
+
+  /* 2-col grid */
+  .photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 24px;
+  }
+  .photo-grid .grid-item {
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    position: relative;
+  }
+  .photo-grid .grid-item.wide {
+    grid-column: 1 / -1;
+    aspect-ratio: 16/9;
+  }
+  .photo-grid .grid-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .photo-grid .grid-item .g-caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.6));
+    padding: 16px 8px 8px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.85);
+    text-align: center;
+  }
+
+  /* ========== 故事文字块 ========== */
+  .story-block {
+    width: 100%; max-width: 420px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,169,110,0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(232,220,200,0.85);
+  }
+  .story-block em { color: var(--gold); font-style: normal; }
+
+  /* ========== 时间线 ========== */
+  .timeline {
+    width: 100%; max-width: 420px;
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 24px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 8px; top: 6px; bottom: 6px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 32px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -24px; top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold);
+  }
+  .tl-year {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .tl-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(232,220,200,0.8);
+  }
+  .tl-photo {
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: 200px;
+  }
+  .tl-photo img {
+    width: 100%; height: 200px;
+    object-fit: cover;
+  }
+
+  /* ========== 分隔线 ========== */
+  .divider {
+    width: 60px; height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin: 0 auto 24px;
+  }
+
+  /* ========== 特殊背景章节 ========== */
+  .chapter.dark-blue { background: linear-gradient(180deg, #0a0a14, #0d1a2e); }
+  .chapter.dark-pink { background: linear-gradient(180deg, #1a0d14, #0a0a14); }
+  .chapter.dark-gold { background: linear-gradient(180deg, #14100a, #0a0a14); }
+  .chapter.dark-snow { background: linear-gradient(180deg, #0a0f1a, #0a0a14); }
+
+  /* ========== 求婚章节 ========== */
+  #proposal {
+    min-height: 100vh;
+    background: radial-gradient(ellipse at center, #1a0a2e 0%, #050510 70%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 80px 24px 100px;
+    text-align: center;
+  }
+  .ring-icon {
+    font-size: 72px;
+    animation: pulse-ring 2s ease-in-out infinite;
+    margin-bottom: 32px;
+  }
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px gold); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 24px gold); }
+  }
+  .proposal-title {
+    font-size: 36px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff 30%, var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 24px;
+    line-height: 1.3;
+  }
+  .proposal-text {
+    font-size: 16px;
+    line-height: 2.2;
+    color: rgba(232,220,200,0.9);
+    max-width: 360px;
+    margin-bottom: 48px;
+  }
+  .proposal-text em { color: var(--gold); font-style: normal; }
+  .yes-btn {
+    background: linear-gradient(135deg, #e91e8c, #ff6b9d);
+    color: white;
+    border: none;
+    padding: 20px 64px;
+    border-radius: 50px;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 3px;
+    box-shadow: 0 8px 30px rgba(233,30,140,0.4);
+    animation: heartbeat 1.5s ease-in-out infinite;
+    margin-bottom: 16px;
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); box-shadow: 0 8px 30px rgba(233,30,140,0.4); }
+    50% { transform: scale(1.04); box-shadow: 0 12px 40px rgba(233,30,140,0.7); }
+  }
+  .yes-btn:active { transform: scale(0.97); }
+
+  /* ========== 烟花 ========== */
+  .firework {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  .spark {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    animation: spark-fly var(--t) ease-out forwards;
+  }
+  @keyframes spark-fly {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+  }
+
+  /* ========== 感谢结尾 ========== */
+  #ending {
+    display: none;
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(ellipse, #1a0520 0%, #050510 80%);
+    z-index: 500;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 40px;
+  }
+  #ending.show { display: flex; animation: fade-in 1.5s ease forwards; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .ending-emoji { font-size: 80px; margin-bottom: 32px; animation: float 3s ease-in-out infinite; }
+  .ending-title { font-size: 36px; font-weight: 900; color: var(--pink); margin-bottom: 20px; line-height: 1.4; }
+  .ending-text { font-size: 16px; line-height: 2.2; color: rgba(232,220,200,0.85); max-width: 340px; }
+  .ending-text em { color: var(--gold); font-style: normal; }
+
+  /* ========== 进入动画 ========== */
+  .fade-in-up {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* ========== 顶部进度条 ========== */
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; z-index: 999;
+    background: linear-gradient(to right, var(--gold), #ff6b9d);
+    transition: width 0.1s;
+  }
+</style>
+</head>
+<body>
+
+<!-- 星空 -->
+<div id="stars"></div>
+
+<!-- 进度条 -->
+<div id="progress" style="width:0%"></div>
+
+<!-- =============== 开屏道歉 =============== -->
+<div id="apology-screen">
+  <div class="apology-emoji">🙇</div>
+  <div class="apology-title">对不起<br>慧慧</div>
+  <div class="apology-text">
+    这些日子，我表现不好<br>
+    做了让你难过的事<br><br>
+    我知道对不起两个字<em>远远不够</em><br>
+    但我想用另一种方式<br>
+    告诉你一些……<em>更重要的事</em>
+  </div>
+  <button class="enter-btn" onclick="enterStory()">打开我们的故事 💌</button>
+</div>
+
+<!-- =============== 主内容 =============== -->
+<div id="main-content">
+
+  <!-- ===== 第一章：那一年 ===== -->
+  <div class="chapter dark-blue">
+    <div class="chapter-label fade-in-up">Chapter 01</div>
+    <div class="chapter-title fade-in-up">那是青涩少年时<br>我认识了你</div>
+    <div class="divider fade-in-up"></div>
+    <div class="story-block fade-in-up">
+      那时候不知道，这个女孩会成为我<em>后来所有故事</em>的主角。
+    </div>
+    <div class="photo-grid fade-in-up">
+      <div class="grid-item wide">
+        <img src="photos/2017-09-30 233222.jpg" alt="">
+        <div class="g-caption">2017 · 默默陪伴</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2018-05-01 194559.jpg" alt="">
+        <div class="g-caption">2018 · 越来越近</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2018-05-15 175306.jpg" alt="">
+        <div class="g-caption">慢慢的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 第二章：2018 演唱会 ===== -->
+  <div class="chapter dark-pink">
+    <div class="chapter-label fade-in-up">Chapter 02</div>
+    <div class="chapter-title fade-in-up">2018年的夏天<br>演唱会和拥抱</div>
+    <div class="divider fade-in-up"></div>
+    <div class="photo-strip">
+      <div class="strip-item">
+        <img src="photos/2018-06-02 204505.jpg" alt="">
+        <div class="strip-caption">她在人群里最好看</div>
+      </div>
+      <div class="strip-item">
+        <img src="photos/2018-06-02 204515.jpg" alt="">
+        <div class="strip-caption">一起大喊一起笑</div>
+      </div>
+      <div class="strip-item">
+        <img src="photos/2018-06-02 211749.jpg" alt="">
+        <div class="strip-caption">应援牌上写着谁</div>
+      </div>
+      <div class="strip-item">
+        <img src="photos/2018-08-19 194037.jpg" alt="">
+        <div class="strip-caption">电梯里的拥抱</div>
+      </div>
+    </div>
+    <div class="story-block fade-in-up">
+      那年夏天，你从背后抱住我。<br>
+      我没说什么，但心里记了很久很久。
+    </div>
+  </div>
+
+  <!-- ===== 第三章：游乐园 + 成长 ===== -->
+  <div class="chapter dark-gold">
+    <div class="chapter-label fade-in-up">Chapter 03</div>
+    <div class="chapter-title fade-in-up">我们的游乐园<br>和那些平凡的日子</div>
+    <div class="divider fade-in-up"></div>
+    <div class="photo-grid fade-in-up">
+      <div class="grid-item wide">
+        <img src="photos/2018-09-16 222024.jpg" alt="">
+        <div class="g-caption">2018秋 · 游乐园</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2018-09-16 163159.jpg" alt="">
+        <div class="g-caption">旋转木马</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2019-04-02 141843.jpg" alt="">
+        <div class="g-caption">2019 · 还是这副样子</div>
+      </div>
+    </div>
+    <div class="photo-card fade-in-up">
+      <img src="photos/2020-02-14 140321.jpg" alt="">
+      <div class="caption">2020 · 依旧爱意满满的一年</div>
+    </div>
+  </div>
+
+  <!-- ===== 第四章：时间线 ===== -->
+  <div class="chapter" style="background: linear-gradient(180deg,#0a0a14,#0d0d1a);">
+    <div class="chapter-label fade-in-up">Chapter 04</div>
+    <div class="chapter-title fade-in-up">我们走过的每一年</div>
+    <div class="divider fade-in-up"></div>
+    <div class="timeline fade-in-up">
+      <div class="tl-item">
+        <div class="tl-year">2017</div>
+        <div class="tl-text">第一次遇见你，那时还不知道你有多重要</div>
+        <div class="tl-photo"><img src="photos/IMG_20220616_184926.jpg" alt=""></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2018</div>
+        <div class="tl-text">演唱会、游乐园，那一年好像什么都快了起来</div>
+        <div class="tl-photo"><img src="photos/2018-12-29 224038.jpg" alt=""></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2019 — 2021</div>
+        <div class="tl-text">普通的日子里，你陪着我吃饭、坐地铁、发呆，<br>那些平凡才是最真实的我们</div>
+        <div class="tl-photo"><img src="photos/2020-12-29-13-06-18-828.jpg" alt=""></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2022</div>
+        <div class="tl-text">野餐垫上躺着，你枕着我，什么也不说也很好</div>
+        <div class="tl-photo"><img src="photos/IMG_20220620_143835.jpg" alt=""></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2023</div>
+        <div class="tl-text">草原、古风、蒙古服饰……这一年我们走了好多地方</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2024</div>
+        <div class="tl-text">（待填写）</div>
+        <div class="tl-photo"><img src="photos/2024-01-19 225152.jpg" alt=""></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2025</div>
+        <div class="tl-text">（待填写）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 第五章：旅行 ===== -->
+  <div class="chapter dark-blue">
+    <div class="chapter-label fade-in-up">Chapter 05</div>
+    <div class="chapter-title fade-in-up">带你去看每一种风景</div>
+    <div class="divider fade-in-up"></div>
+    <div class="photo-card fade-in-up">
+      <img src="photos/2023-10-03 173127.jpg" alt="">
+      <div class="caption">2023秋 · 夕阳下的草原，你靠着我</div>
+    </div>
+    <div class="photo-grid fade-in-up">
+      <div class="grid-item">
+        <img src="photos/2023-10-04 100023.jpg" alt="">
+        <div class="g-caption">蒙古彩旗 · 异族情侣</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2023-10-04 094430.jpg" alt="">
+        <div class="g-caption">都笑了</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2025-12-27 125807.jpg" alt="">
+        <div class="g-caption">雪地里嘟嘟嘴</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2023-06-18 115425.jpg" alt="">
+        <div class="g-caption">大树下，像画</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 第六章：古风 + 最美 ===== -->
+  <div class="chapter dark-gold">
+    <div class="chapter-label fade-in-up">Chapter 06</div>
+    <div class="chapter-title fade-in-up">你最美的样子<br>我都记得</div>
+    <div class="divider fade-in-up"></div>
+    <div class="photo-card fade-in-up">
+      <img src="photos/DSCF3579.JPG" alt="">
+      <div class="caption">古风灯海夜 · 你是那晚最亮的光</div>
+    </div>
+    <div class="photo-strip">
+      <div class="strip-item">
+        <img src="photos/2023-11-28 100630(1).jpg" alt="">
+        <div class="strip-caption">花墙 · 你贴着我</div>
+      </div>
+      <div class="strip-item">
+        <img src="photos/2024-02-13 214307.jpg" alt="">
+        <div class="strip-caption">情人节 · 双手托腮最美</div>
+      </div>
+      <div class="strip-item">
+        <img src="photos/2023-09-16 144814.jpg" alt="">
+        <div class="strip-caption">熊猫和你</div>
+      </div>
+      <div class="strip-item">
+        <img src="photos/2023-06-16 113019.png" alt="">
+        <div class="strip-caption">复古餐厅 · 颜值峰值</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 第七章：日常 ===== -->
+  <div class="chapter dark-pink">
+    <div class="chapter-label fade-in-up">Chapter 07</div>
+    <div class="chapter-title fade-in-up">那些鸡毛蒜皮<br>才是我最爱的</div>
+    <div class="divider fade-in-up"></div>
+    <div class="photo-grid fade-in-up">
+      <div class="grid-item">
+        <img src="photos/2023-10-21 185019.png" alt="">
+        <div class="g-caption">你在我背上大笑</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2023-12-19 191841.jpg" alt="">
+        <div class="g-caption">蓝色怪兽帽</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2025-10-31 203230.jpg" alt="">
+        <div class="g-caption">Halloween小动物</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2025-09-27 141016.jpg" alt="">
+        <div class="g-caption">电梯里还是你</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2023-07-29 184523.jpg" alt="">
+        <div class="g-caption">霓虹酒吧</div>
+      </div>
+      <div class="grid-item">
+        <img src="photos/2023-10-22 201255.jpg" alt="">
+        <div class="g-caption">Mini KTV里的搭档</div>
+      </div>
+    </div>
+    <div class="story-block fade-in-up">
+      吵过架，冷战过，也哭过。<br>
+      但那些不快乐的时间，加起来<br>
+      也没有你一个笑容<em>让我觉得值得</em>的时间长。
+    </div>
+  </div>
+
+  <!-- ===== 第八章：道歉 + 过渡 ===== -->
+  <div class="chapter" style="background: linear-gradient(180deg,#100a0a,#0a0a14); text-align:center;">
+    <div class="chapter-title fade-in-up">这几天，是我的错</div>
+    <div class="divider fade-in-up"></div>
+    <div class="story-block fade-in-up" style="text-align:left;">
+      我知道最近让你委屈了。<br><br>
+      我做事不过脑子，不顾你的感受。<br>
+      你生气，是应该的。<br><br>
+      但我不想用"对不起"就把它糊弄过去，<br>
+      我想让你知道——<br><br>
+      <em>我认真地、深深地爱着你。</em><br><br>
+      爱到想用剩下的每一天，<br>
+      把这些亏欠你的，一点一点还回来。
+    </div>
+    <div class="photo-card fade-in-up">
+      <img src="photos/2023-10-21 140135.jpg" alt="">
+      <div class="caption">这对眼睛，我看了好多年</div>
+    </div>
+  </div>
+
+  <!-- ===== 求婚章节 ===== -->
+  <div id="proposal">
+    <div class="ring-icon fade-in-up">💍</div>
+    <div class="proposal-title fade-in-up">张慧<br>嫁给我好吗</div>
+    <div class="divider fade-in-up"></div>
+    <div class="proposal-text fade-in-up">
+      从2017年到现在，<br>
+      我们一起哭过、笑过、闹过、和好过。<br><br>
+      我不是最完美的人，<br>
+      但你是我<em>最想变好</em>的理由。<br><br>
+      我想把那些好的、不那么好的，<br>
+      <em>全部</em>和你一起过下去。<br><br>
+      <em>余生，可以是你吗？</em>
+    </div>
+    <button class="yes-btn" onclick="sayYes()">💗 愿意 💗</button>
+    <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:8px;">按下这颗心</div>
+  </div>
+
+</div><!-- end main-content -->
+
+<!-- ===== 结局 ===== -->
+<div id="ending">
+  <div class="ending-emoji">🥂</div>
+  <div class="ending-title">谢谢你<br>说愿意 ❤️</div>
+  <div class="ending-text">
+    从现在起，<br>
+    你的每一个委屈都是我要补上的功课，<br>
+    你的每一次笑，都是我<em>最想守护</em>的事。<br><br>
+    <em>我爱你，张慧。</em>
+  </div>
+</div>
+
+<script>
+// ===== 生成星空 =====
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 180; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2.5 + 0.5;
+  s.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${Math.random()*100}%; top:${Math.random()*100}%;
+    --d:${(Math.random()*3+1.5).toFixed(1)}s;
+    animation-delay:${(Math.random()*3).toFixed(1)}s;
+  `;
+  starsEl.appendChild(s);
+}
+
+// ===== 进入故事 =====
+function enterStory() {
+  const btn = document.querySelector('.enter-btn');
+  btn.disabled = true;
+  // 飘心
+  for (let i = 0; i < 8; i++) {
+    setTimeout(() => {
+      const h = document.createElement('div');
+      h.className = 'heart-trail';
+      h.textContent = ['💗','💕','❤️','💖'][Math.floor(Math.random()*4)];
+      h.style.left = (20 + Math.random()*60) + '%';
+      h.style.bottom = '20%';
+      document.getElementById('apology-screen').appendChild(h);
+      setTimeout(() => h.remove(), 2000);
+    }, i * 150);
+  }
+  setTimeout(() => {
+    document.getElementById('apology-screen').classList.add('hidden');
+    document.getElementById('main-content').classList.add('visible');
+    initObserver();
+    initProgress();
+  }, 800);
+}
+
+// ===== IntersectionObserver 进场动画 =====
+function initObserver() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-in-up').forEach(el => obs.observe(el));
+}
+
+// ===== 进度条 =====
+function initProgress() {
+  window.addEventListener('scroll', () => {
+    const total = document.body.scrollHeight - window.innerHeight;
+    const pct = (window.scrollY / total * 100).toFixed(1);
+    document.getElementById('progress').style.width = pct + '%';
+  });
+}
+
+// ===== 求婚按钮 =====
+function sayYes() {
+  // 烟花
+  for (let i = 0; i < 12; i++) {
+    setTimeout(() => launchFirework(), i * 180);
+  }
+  setTimeout(() => {
+    document.getElementById('ending').classList.add('show');
+  }, 2200);
+}
+
+function launchFirework() {
+  const fw = document.createElement('div');
+  fw.className = 'firework';
+  const x = 15 + Math.random() * 70;
+  const y = 10 + Math.random() * 60;
+  fw.style.left = x + 'vw';
+  fw.style.top = y + 'vh';
+  const colors = ['#ff6b9d','#c9a96e','#fff','#ff3b7a','#ffd700','#a78bfa'];
+  for (let i = 0; i < 20; i++) {
+    const spark = document.createElement('div');
+    spark.className = 'spark';
+    const angle = (i / 20) * 360;
+    const dist = 60 + Math.random() * 80;
+    const rad = angle * Math.PI / 180;
+    spark.style.cssText = `
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      --x:${(Math.cos(rad)*dist).toFixed(0)}px;
+      --y:${(Math.sin(rad)*dist).toFixed(0)}px;
+      --t:${(0.6 + Math.random()*0.5).toFixed(2)}s;
+    `;
+    fw.appendChild(spark);
+  }
+  document.body.appendChild(fw);
+  setTimeout(() => fw.remove(), 1500);
+}
+
+// ===== 编辑模式 =====
+(function() {
+  // 注入编辑模式样式
+  const style = document.createElement('style');
+  style.textContent = `
+    #edit-fab {
+      position: fixed;
+      bottom: 28px; right: 20px;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c9a96e, #e8c97e);
+      color: #1a1000;
+      font-size: 22px;
+      border: none;
+      box-shadow: 0 4px 18px rgba(201,169,110,0.55);
+      z-index: 8000;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s;
+    }
+    #edit-fab:active { transform: scale(0.92); }
+    #edit-fab.active {
+      background: linear-gradient(135deg, #e91e8c, #ff6b9d);
+      color: white;
+    }
+    .editable-active {
+      outline: 2px dashed rgba(201,169,110,0.7) !important;
+      outline-offset: 3px;
+      border-radius: 4px;
+      cursor: text !important;
+    }
+    #edit-modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(5,5,16,0.88);
+      z-index: 9000;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #edit-modal-overlay.open { display: flex; }
+    #edit-modal {
+      background: #14142a;
+      border: 1px solid rgba(201,169,110,0.35);
+      border-radius: 18px;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.7);
+    }
+    #edit-modal h3 {
+      color: #c9a96e;
+      font-size: 15px;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    #edit-textarea {
+      width: 100%;
+      min-height: 140px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(201,169,110,0.3);
+      border-radius: 10px;
+      color: #e8dcc8;
+      font-size: 15px;
+      line-height: 1.8;
+      padding: 12px;
+      resize: vertical;
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+    #edit-textarea:focus { outline: none; border-color: #c9a96e; }
+    #edit-hint {
+      font-size: 12px;
+      color: rgba(232,220,200,0.45);
+      margin: 8px 0 16px;
+      text-align: center;
+    }
+    .edit-btns {
+      display: flex; gap: 10px;
+    }
+    .edit-btn-cancel {
+      flex: 1;
+      padding: 12px;
+      border-radius: 50px;
+      border: 1px solid rgba(201,169,110,0.35);
+      background: transparent;
+      color: rgba(232,220,200,0.6);
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .edit-btn-save {
+      flex: 2;
+      padding: 12px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, #c9a96e, #e8c97e);
+      color: #1a1000;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #edit-saved-toast {
+      position: fixed;
+      bottom: 95px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(201,169,110,0.92);
+      color: #1a1000;
+      padding: 10px 22px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #edit-saved-toast.show { opacity: 1; }
+  `;
+  document.head.appendChild(style);
+
+  // FAB 按钮
+  const fab = document.createElement('button');
+  fab.id = 'edit-fab';
+  fab.title = '编辑模式';
+  fab.innerHTML = '✏️';
+  document.body.appendChild(fab);
+
+  // Modal
+  const overlay = document.createElement('div');
+  overlay.id = 'edit-modal-overlay';
+  overlay.innerHTML = `
+    <div id="edit-modal">
+      <h3>✏️ 编辑文字</h3>
+      <textarea id="edit-textarea" placeholder="在这里修改文字内容..."></textarea>
+      <div id="edit-hint">支持换行，用 &lt;em&gt;关键词&lt;/em&gt; 标记金色高亮</div>
+      <div class="edit-btns">
+        <button class="edit-btn-cancel" id="edit-cancel">取消</button>
+        <button class="edit-btn-save" id="edit-save">保存 ✓</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Toast
+  const toast = document.createElement('div');
+  toast.id = 'edit-saved-toast';
+  toast.textContent = '✓ 已保存';
+  document.body.appendChild(toast);
+
+  let editMode = false;
+  let currentTarget = null;
+
+  // 可编辑的选择器
+  const EDITABLE = [
+    '.apology-title', '.apology-text',
+    '.chapter-title', '.chapter-sub', '.chapter-label',
+    '.story-block', '.caption', '.strip-caption', '.g-caption',
+    '.tl-year', '.tl-text',
+    '.proposal-title', '.proposal-text',
+    '.ending-title', '.ending-text',
+  ].join(',');
+
+  function enableEditMode() {
+    editMode = true;
+    fab.classList.add('active');
+    fab.innerHTML = '✕';
+    fab.title = '退出编辑';
+    document.querySelectorAll(EDITABLE).forEach(el => {
+      el.classList.add('editable-active');
+      el.addEventListener('click', onEditClick);
+    });
+  }
+
+  function disableEditMode() {
+    editMode = false;
+    fab.classList.remove('active');
+    fab.innerHTML = '✏️';
+    fab.title = '编辑模式';
+    document.querySelectorAll(EDITABLE).forEach(el => {
+      el.classList.remove('editable-active');
+      el.removeEventListener('click', onEditClick);
+    });
+  }
+
+  function onEditClick(e) {
+    if (!editMode) return;
+    e.stopPropagation();
+    currentTarget = e.currentTarget;
+    document.getElementById('edit-textarea').value = currentTarget.innerHTML
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/em>/gi, '</em>')
+      .trim();
+    overlay.classList.add('open');
+    setTimeout(() => document.getElementById('edit-textarea').focus(), 100);
+  }
+
+  fab.addEventListener('click', () => {
+    if (editMode) disableEditMode();
+    else enableEditMode();
+  });
+
+  document.getElementById('edit-cancel').addEventListener('click', () => {
+    overlay.classList.remove('open');
+    currentTarget = null;
+  });
+
+  document.getElementById('edit-save').addEventListener('click', () => {
+    if (!currentTarget) return;
+    const val = document.getElementById('edit-textarea').value
+      .replace(/\n/g, '<br>');
+    currentTarget.innerHTML = val;
+    overlay.classList.remove('open');
+    currentTarget = null;
+    // Toast
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+
+  // 点击遮罩关闭
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+})();
+</script>
+</body>
+</html>
