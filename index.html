@@ -319,6 +319,21 @@
   .chapter.dark-gold { background: linear-gradient(180deg, #14100a, #0a0a14); }
   .chapter.dark-snow { background: linear-gradient(180deg, #0a0f1a, #0a0a14); }
 
+  /* ========== 解锁按钮动画 ========== */
+  @keyframes blink-hint {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ========== 求婚章节展开动画 ========== */
+  #proposal.revealed {
+    animation: proposal-reveal 1.2s ease forwards;
+  }
+  @keyframes proposal-reveal {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   /* ========== 求婚章节 ========== */
   #proposal {
     min-height: 100vh;
@@ -685,8 +700,38 @@
     </div>
   </div>
 
+  <!-- ===== 解锁按钮（隐藏在第八章底部） ===== -->
+  <div id="unlock-gate" style="
+    text-align:center;
+    padding: 60px 24px 80px;
+    background: linear-gradient(180deg,#0a0a14,#050510);
+    display:none;
+  ">
+    <div id="unlock-hint" style="
+      font-size:13px;
+      color:rgba(255,255,255,0.25);
+      letter-spacing:3px;
+      margin-bottom:20px;
+      animation: blink-hint 2s ease-in-out infinite;
+    ">— 还有最后一件事 —</div>
+    <button id="unlock-btn" onclick="unlockProposal()" style="
+      background: none;
+      border: 1px solid rgba(201,169,110,0.4);
+      color: rgba(201,169,110,0.8);
+      font-size:15px;
+      padding: 14px 36px;
+      border-radius: 40px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      transition: all 0.4s;
+    " onmouseover="this.style.borderColor='rgba(201,169,110,0.9)';this.style.color='#c9a96e';this.style.boxShadow='0 0 20px rgba(201,169,110,0.3)'"
+       onmouseout="this.style.borderColor='rgba(201,169,110,0.4)';this.style.color='rgba(201,169,110,0.8)';this.style.boxShadow='none'">
+      继续 &rarr;
+    </button>
+  </div>
+
   <!-- ===== 求婚章节 ===== -->
-  <div id="proposal">
+  <div id="proposal" style="display:none;">
     <div class="ring-icon fade-in-up">💍</div>
     <div class="proposal-title fade-in-up">张慧<br>嫁给我好吗</div>
     <div class="divider fade-in-up"></div>
@@ -754,6 +799,7 @@ function enterStory() {
     document.getElementById('main-content').classList.add('visible');
     initObserver();
     initProgress();
+    initUnlockGate();
   }, 800);
 }
 
@@ -774,6 +820,61 @@ function initProgress() {
     const pct = (window.scrollY / total * 100).toFixed(1);
     document.getElementById('progress').style.width = pct + '%';
   });
+}
+
+// ===== 解锁求婚章节 =====
+let unlockShown = false;
+
+function initUnlockGate() {
+  const gate = document.getElementById('unlock-gate');
+  const ch8 = document.querySelector('.chapter:last-of-type');
+  if (!ch8) return;
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !unlockShown) {
+        // 第八章完全进入视口后，延迟1.5秒显示解锁按钮
+        setTimeout(() => {
+          unlockShown = true;
+          gate.style.display = 'block';
+          gate.style.opacity = '0';
+          gate.style.transition = 'opacity 1.2s ease';
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => { gate.style.opacity = '1'; });
+          });
+        }, 1500);
+      }
+    });
+  }, { threshold: 0.85 });
+
+  obs.observe(ch8);
+}
+
+function unlockProposal() {
+  const gate = document.getElementById('unlock-gate');
+  const proposal = document.getElementById('proposal');
+
+  // 淡出按钮
+  gate.style.transition = 'opacity 0.6s ease';
+  gate.style.opacity = '0';
+
+  setTimeout(() => {
+    gate.style.display = 'none';
+    proposal.style.display = 'flex';
+    proposal.classList.add('revealed');
+
+    // 让 fade-in-up 元素重新触发
+    setTimeout(() => {
+      proposal.querySelectorAll('.fade-in-up').forEach(el => {
+        el.classList.add('visible');
+      });
+    }, 400);
+
+    // 滚动到求婚章节
+    setTimeout(() => {
+      proposal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  }, 600);
 }
 
 // ===== 求婚按钮 =====
