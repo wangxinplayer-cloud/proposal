@@ -825,7 +825,8 @@ let unlockShown = false;
 
 function initUnlockGate() {
   const gate = document.getElementById('unlock-gate');
-  const ch8 = document.querySelector('.chapter:last-of-type');
+  const allChapters = document.querySelectorAll('.chapter');
+  const ch8 = allChapters[allChapters.length - 1];
   if (!ch8) return;
 
   const obs = new IntersectionObserver((entries) => {
@@ -843,7 +844,7 @@ function initUnlockGate() {
         }, 1500);
       }
     });
-  }, { threshold: 0.85 });
+  }, { threshold: 0.5 });
 
   obs.observe(ch8);
 }
